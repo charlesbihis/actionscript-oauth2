@@ -1,0 +1,7 @@
+An ActionScript 3 library for interfacing with OAuth 2.0 services, implemented according to the OAuth 2.0 v2.15 specification.
+
+Dependencies:
+  -as3corelib (https://github.com/mikechambers/as3corelib)
+
+See:
+  -The OAuth 2.0 Authorization Protocol Specification v2.15 (http://tools.ietf.org/html/draft-ietf-oauth-v2-15)
