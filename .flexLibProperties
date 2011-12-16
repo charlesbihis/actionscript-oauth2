@@ -6,6 +6,7 @@
     <classEntry path="com.adobe.protocols.oauth2.grant.AuthorizationCodeGrant"/>
     <classEntry path="com.adobe.protocols.oauth2.event.IOAuth2Event"/>
     <classEntry path="com.adobe.protocols.oauth2.event.GetAccessTokenEvent"/>
+    <classEntry path="com.adobe.protocols.oauth2.grant.ImplicitGrant"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -2,9 +2,9 @@ package com.adobe.protocols.oauth2
 {
 	import com.adobe.protocols.dict.events.ErrorEvent;
 	import com.adobe.protocols.oauth2.event.GetAccessTokenEvent;
-	import com.adobe.protocols.oauth2.event.IOAuth2Event;
 	import com.adobe.protocols.oauth2.grant.AuthorizationCodeGrant;
 	import com.adobe.protocols.oauth2.grant.IGrantType;
+	import com.adobe.protocols.oauth2.grant.ImplicitGrant;
 	import com.adobe.serialization.json.JSONParseError;
 	
 	import flash.events.Event;
@@ -56,6 +56,10 @@ package com.adobe.protocols.oauth2
 			if (grantType is AuthorizationCodeGrant)
 			{
 				getAccessTokenWithAuthorizationCodeGrant(grantType as AuthorizationCodeGrant);
+			}
+			else if (grantType is ImplicitGrant)
+			{
+				getAccessTokenWithImplicitGrant(grantType as ImplicitGrant);
 			}
 		}
 		
@@ -185,6 +189,58 @@ package com.adobe.protocols.oauth2
 				dispatchEvent(getAccessTokenEvent);
 			}  // onStageWebViewError
 		}  // getAccessTokenWithAuthorizationCodeGrant
+		
+		private function getAccessTokenWithImplicitGrant(implicitGrant:ImplicitGrant):void
+		{
+			// create result event
+			var getAccessTokenEvent:GetAccessTokenEvent = new GetAccessTokenEvent();
+			
+			// add event listeners
+			implicitGrant.stageWebView.addEventListener(LocationChangeEvent.LOCATION_CHANGING, onLocationChange);
+			implicitGrant.stageWebView.addEventListener(LocationChangeEvent.LOCATION_CHANGE, onLocationChange);
+			implicitGrant.stageWebView.addEventListener(ErrorEvent.ERROR, onStageWebViewError);
+			
+			// start the auth process
+			log.info("Loading auth URL: " + implicitGrant.getFullAuthUrl(authEndpoint));
+			implicitGrant.stageWebView.loadURL(implicitGrant.getFullAuthUrl(authEndpoint));
+			
+			function onLocationChange(event:LocationChangeEvent):void
+			{
+				log.info("Loading URL: " + event.location);
+				if (event.location.indexOf(implicitGrant.redirectUri) == 0)
+				{
+					log.info("Redirect URI encountered (" + implicitGrant.redirectUri + ").  Extracting values from path.");
+					
+					// stop event from propogating
+					event.preventDefault();
+					
+					// determine if authorization was successful
+					var queryParams:Object = extractQueryParams(event.location);
+					var accessToken:String = queryParams.access_token;
+					if (accessToken != null)
+					{
+						log.debug("Access token: " + accessToken);
+						getAccessTokenEvent.parseAccessTokenResponse(queryParams);
+						dispatchEvent(getAccessTokenEvent);
+					}  // if statement
+					else
+					{
+						log.error("Error encountered during access token request:\n" + ObjectUtil.toString(queryParams));
+						getAccessTokenEvent.errorCode = queryParams.error;
+						getAccessTokenEvent.errorMessage = queryParams.error_description;
+						dispatchEvent(getAccessTokenEvent);
+					}  // else statement
+				}  // if statement
+			}  // onLocationChange
+			
+			function onStageWebViewError(event:ErrorEvent):void
+			{
+				log.error("Error occurred with StageWebView: " + ObjectUtil.toString(event));
+				getAccessTokenEvent.errorCode = "STAGE_WEB_VIEW_ERROR";
+				getAccessTokenEvent.errorMessage = "Error occurred with StageWebView";
+				dispatchEvent(getAccessTokenEvent);
+			}  // onStageWebViewError
+		}  // getAccessTokenWithImplicitGrant
 		
 		private function extractQueryParams(url:String):Object
 		{

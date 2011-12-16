@@ -13,6 +13,7 @@ package com.adobe.protocols.oauth2.event
 		private var _expiresIn:int;
 		private var _refreshToken:String;
 		private var _scope:String;
+		private var _state:String;
 		private var _response:Object;
 		
 		public function GetAccessTokenEvent(bubbles:Boolean = false, cancelable:Boolean = false)
@@ -30,6 +31,7 @@ package com.adobe.protocols.oauth2.event
 			_expiresIn = int(response.expires_in);
 			_refreshToken = response.refresh_token;
 			_scope = response.scope;
+			_state = response.state;
 			
 			// extra
 			_response = response;
@@ -83,6 +85,11 @@ package com.adobe.protocols.oauth2.event
 		public function get scope():String
 		{
 			return _scope;
+		}
+		
+		public function get state():String
+		{
+			return _state;
 		}
 		
 		public function get response():Object
