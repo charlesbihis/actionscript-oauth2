@@ -5,6 +5,7 @@ package com.adobe.protocols.oauth2
 	import com.adobe.protocols.oauth2.grant.AuthorizationCodeGrant;
 	import com.adobe.protocols.oauth2.grant.IGrantType;
 	import com.adobe.protocols.oauth2.grant.ImplicitGrant;
+	import com.adobe.protocols.oauth2.grant.ResourceOwnerCredentialsGrant;
 	import com.adobe.serialization.json.JSONParseError;
 	
 	import flash.events.Event;
@@ -60,6 +61,10 @@ package com.adobe.protocols.oauth2
 			else if (grantType is ImplicitGrant)
 			{
 				getAccessTokenWithImplicitGrant(grantType as ImplicitGrant);
+			}
+			else if (grantType is ResourceOwnerCredentialsGrant)
+			{
+				getAccessTokenWithResourceOwnerCredentialsGrant(grantType as ResourceOwnerCredentialsGrant);
 			}
 		}
 		
@@ -241,6 +246,69 @@ package com.adobe.protocols.oauth2
 				dispatchEvent(getAccessTokenEvent);
 			}  // onStageWebViewError
 		}  // getAccessTokenWithImplicitGrant
+		
+		private function getAccessTokenWithResourceOwnerCredentialsGrant(resourceOwnerCredentialsGrant:ResourceOwnerCredentialsGrant):void
+		{
+			// create result event
+			var getAccessTokenEvent:GetAccessTokenEvent = new GetAccessTokenEvent();
+			
+			// set up HTTP-service call
+			var httpService:HTTPService = new HTTPService();
+			httpService.url = tokenEndpoint;
+			httpService.method = "POST";
+			httpService.contentType = "application/x-www-form-urlencoded";
+			
+			// set up parameters
+			var args:Object = new Object();
+			args.grant_type = "password";
+			args.client_id = resourceOwnerCredentialsGrant.clientId;
+			args.client_secret = resourceOwnerCredentialsGrant.clientSecret;
+			args.username = resourceOwnerCredentialsGrant.username;
+			args.password = resourceOwnerCredentialsGrant.password;
+			args.scope = resourceOwnerCredentialsGrant.scope;
+			
+			// make the call
+			var getTokenResponder:CallResponder = new CallResponder();
+			getTokenResponder.addEventListener(ResultEvent.RESULT, onGetAccessTokenResult);
+			getTokenResponder.addEventListener(FaultEvent.FAULT, onGetAccessTokenFault);
+			getTokenResponder.token = httpService.send(args);
+			
+			function onGetAccessTokenResult(event:ResultEvent):void
+			{
+				try
+				{
+					var response:Object = com.adobe.serialization.json.JSON.decode(getTokenResponder.lastResult);
+					log.debug("Access token response received with values:\n" + ObjectUtil.toString(response));
+					getAccessTokenEvent.parseAccessTokenResponse(response);
+				}  // try statement
+				catch (error:JSONParseError)
+				{
+					getAccessTokenEvent.errorCode = "com.adobe.serialization.json.JSONParseError";
+					getAccessTokenEvent.errorMessage = "Error parsing output from access token response: \"" + getTokenResponder.lastResult + "\"";
+				}  // catch statement
+				
+				dispatchEvent(getAccessTokenEvent);
+			}  // onGetAccessTokenResult
+			
+			function onGetAccessTokenFault(event:FaultEvent):void
+			{
+				log.error("Error encountered during access token request:\n" + ObjectUtil.toString(event.fault.content));
+				
+				try
+				{
+					var fault:Object = com.adobe.serialization.json.JSON.decode(event.fault.content as String);
+					getAccessTokenEvent.errorCode = fault.error;
+					getAccessTokenEvent.errorMessage = fault.error_description;
+				}  // try statement
+				catch (error:JSONParseError)
+				{
+					getAccessTokenEvent.errorCode = "Unknown";
+					getAccessTokenEvent.errorMessage = "Error encountered during access token request.  Unable to parse fault message: \"" + event.fault.content + "\"";
+				}  // catch statement
+				
+				dispatchEvent(getAccessTokenEvent);
+			}  // onGetAccessTokenFault
+		}  // getAccessTokenWithResourceOwnerCredentialsGrant
 		
 		private function extractQueryParams(url:String):Object
 		{
