@@ -8,6 +8,7 @@
     <classEntry path="com.adobe.protocols.oauth2.event.GetAccessTokenEvent"/>
     <classEntry path="com.adobe.protocols.oauth2.grant.ImplicitGrant"/>
     <classEntry path="com.adobe.protocols.oauth2.grant.ResourceOwnerCredentialsGrant"/>
+    <classEntry path="com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

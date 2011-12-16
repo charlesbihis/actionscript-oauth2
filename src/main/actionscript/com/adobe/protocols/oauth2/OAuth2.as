@@ -2,6 +2,7 @@ package com.adobe.protocols.oauth2
 {
 	import com.adobe.protocols.dict.events.ErrorEvent;
 	import com.adobe.protocols.oauth2.event.GetAccessTokenEvent;
+	import com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent;
 	import com.adobe.protocols.oauth2.grant.AuthorizationCodeGrant;
 	import com.adobe.protocols.oauth2.grant.IGrantType;
 	import com.adobe.protocols.oauth2.grant.ImplicitGrant;
@@ -68,10 +69,67 @@ package com.adobe.protocols.oauth2
 			}
 		}
 		
-		public function refreshAccessToken():void
+		public function refreshAccessToken(refreshToken:String, clientId:String, clientSecret:String, scope:String = null):void
 		{
+			// create result event
+			var refreshAccessTokenEvent:RefreshAccessTokenEvent = new RefreshAccessTokenEvent();
 			
-		}
+			// set up HTTP-service call
+			var httpService:HTTPService = new HTTPService();
+			httpService.url = tokenEndpoint;
+			httpService.method = "POST";
+			httpService.contentType = "application/x-www-form-urlencoded";
+			
+			// set up parameters
+			var args:Object = new Object();
+			args.grant_type = "refresh_token";
+			args.client_id = clientId;
+			args.client_secret = clientSecret;
+			args.refresh_token = refreshToken;
+			args.scope = scope;
+			
+			// make the call
+			var getTokenResponder:CallResponder = new CallResponder();
+			getTokenResponder.addEventListener(ResultEvent.RESULT, onRefreshAccessTokenResult);
+			getTokenResponder.addEventListener(FaultEvent.FAULT, onRefreshAccessTokenFault);
+			getTokenResponder.token = httpService.send(args);
+			
+			function onRefreshAccessTokenResult(event:ResultEvent):void
+			{
+				try
+				{
+					var response:Object = com.adobe.serialization.json.JSON.decode(getTokenResponder.lastResult);
+					log.debug("Refresh access token response received with values:\n" + ObjectUtil.toString(response));
+					refreshAccessTokenEvent.parseAccessTokenResponse(response);
+				}  // try statement
+				catch (error:JSONParseError)
+				{
+					refreshAccessTokenEvent.errorCode = "com.adobe.serialization.json.JSONParseError";
+					refreshAccessTokenEvent.errorMessage = "Error parsing output from refresh access token response: \"" + getTokenResponder.lastResult + "\"";					
+				}  // catch statement
+				
+				dispatchEvent(refreshAccessTokenEvent);
+			}  // onRefreshAccessTokenResult
+			
+			function onRefreshAccessTokenFault(event:FaultEvent):void
+			{
+				log.error("Error encountered during refresh access token request:\n" + ObjectUtil.toString(event.fault.content));
+				
+				try
+				{
+					var fault:Object = com.adobe.serialization.json.JSON.decode(event.fault.content as String);
+					refreshAccessTokenEvent.errorCode = fault.error;
+					refreshAccessTokenEvent.errorMessage = fault.error_description;
+				}  // try statement
+				catch (error:JSONParseError)
+				{
+					refreshAccessTokenEvent.errorCode = "Unknown";
+					refreshAccessTokenEvent.errorMessage = "Error encountered during refresh access token request.  Unable to parse fault message: \"" + event.fault.content + "\"";
+				}  // catch statement
+				
+				dispatchEvent(refreshAccessTokenEvent);
+			}  // onRefreshAccessTokenFault
+		}  // refreshAccessToken
 		
 		public function setLogLevel(logEventLevel:int):void
 		{
