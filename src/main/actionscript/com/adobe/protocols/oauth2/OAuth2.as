@@ -23,6 +23,26 @@ package com.adobe.protocols.oauth2
 	import mx.utils.ObjectUtil;
 
 	/**
+	 * Event that is broadcast when results from a <code>getAccessToken</code> request are received.
+	 * 
+	 * @eventType com.adobe.protocols.oauth2.event.GetAccessTokenEvent.TYPE
+	 * 
+	 * @see #getAccessToken()
+	 * @see com.adobe.protocols.oauth2.event.GetAccessTokenEvent
+	 */
+	[Event(name="getAccessToken", type="com.adobe.protocols.oauth2.event.GetAccessTokenEvent")]
+	
+	/**
+	 * Event that is broadcast when results from a <code>refreshAccessToken</code> request are received.
+	 * 
+	 * @eventType com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent.TYPE
+	 * 
+	 * @see #refreshAccessToken()
+	 * @see com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent
+	 */
+	[Event(name="refreshAccessToken", type="com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent")]
+	
+	/**
 	 * Utility class the encapsulates APIs for interaction with an OAuth 2.0 server.
 	 * Implemented against the OAuth 2.0 v2.15 specification.
 	 * 
