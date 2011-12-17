@@ -2,6 +2,14 @@ package com.adobe.protocols.oauth2.grant
 {
 	import flash.media.StageWebView;
 
+	/**
+	 * Class to encapsulate all of the relevant properties used during
+	 * a get-access-token request using the implicit grant type.
+	 * 
+	 * @author Charles Bihis (charles@whoischarles.com)
+	 * @langversion ActionScript 3.0
+	 * @playerversion Flash 10
+	 */
 	public class ImplicitGrant implements IGrantType
 	{
 		private var _stageWebView:StageWebView;
@@ -10,6 +18,15 @@ package com.adobe.protocols.oauth2.grant
 		private var _scope:String;
 		private var _state:Object;
 		
+		/**
+		 * Constructor.
+		 * 
+		 * @param stageWebView The <code>StageWebView</code> object for which to display the user-consent page
+		 * @param clientId The client identifier
+		 * @param redirectUri The redirect URI to return to after the authorization process has completed
+		 * @param scope (Optional) The scope of the access request expressed as a list of space-delimited, case-sensitive strings
+		 * @param state (Optional) An opaque value used by the client to maintain state between the request and callback
+		 */
 		public function ImplicitGrant(stageWebView:StageWebView, clientId:String, redirectUri:String, scope:String = null, state:Object = null)
 		{
 			_stageWebView = stageWebView;
@@ -17,33 +34,59 @@ package com.adobe.protocols.oauth2.grant
 			_redirectUri = redirectUri;
 			_scope = scope;
 			_state = state;
-		}
+		}  // ImplicitGrant
 		
+		/**
+		 * The <code>StageWebView</code> object for which to display the user-consent page.
+		 */
 		public function get stageWebView():StageWebView
 		{
 			return _stageWebView;
 		}  // stageWebView
 		
+		/**
+		 * The client identifier as described in the OAuth spec v2.15,
+		 * section 3, Client Authentication.
+		 * 
+		 * @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-3
+		 */
 		public function get clientId():String
 		{
 			return _clientId;
 		}  // clientId
 		
+		/**
+		 * The redirect endpoint for the client as described in the OAuth
+		 * spec v2.15, section 3.1.2, Redirection Endpoint.
+		 * 
+		 * @see http://tools.ietf.org/html/draft-ietf-oauth-v2-20#section-3.1.2
+		 */
 		public function get redirectUri():String
 		{
 			return _redirectUri;
 		}  // redirectUri
 		
+		/**
+		 * The scope of the access request expressed as a list of space-delimited,
+		 * case-sensitive strings.
+		 */
 		public function get scope():String
 		{
 			return _scope;
 		}  // scope
 		
+		/**
+		 * An opaque value used by the client to maintain state between the request
+		 * and callback.
+		 */
 		public function get state():Object
 		{
 			return _state;
 		}  // state
 		
+		/**
+		 * Convenience method for getting the full authorization URL.
+		 */
 		public function getFullAuthUrl(endpoint:String):String
 		{
 			var url:String = endpoint + "?response_type=token&client_id=" + clientId + "&redirect_uri=" + redirectUri;
@@ -62,5 +105,5 @@ package com.adobe.protocols.oauth2.grant
 			
 			return url;
 		}  // getFullAuthUrl
-	}
-}
+	}  // class declaration
+}  // package

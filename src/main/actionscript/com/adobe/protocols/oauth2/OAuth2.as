@@ -22,6 +22,16 @@ package com.adobe.protocols.oauth2
 	import mx.rpc.http.HTTPService;
 	import mx.utils.ObjectUtil;
 
+	/**
+	 * Utility class the encapsulates APIs for interaction with an OAuth 2.0 server.
+	 * Implemented against the OAuth 2.0 v2.15 specification.
+	 * 
+	 * @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15
+	 * 
+	 * @author Charles Bihis (charles@whoischarles.com)
+	 * @langversion ActionScript 3.0
+	 * @playerversion Flash 10.0
+	 */
 	public class OAuth2 extends EventDispatcher
 	{
 		private var grantType:IGrantType;
@@ -30,6 +40,13 @@ package com.adobe.protocols.oauth2
 		private var log:ILogger;
 		private var logTarget:TraceTarget;
 		
+		/**
+		 * Constructor to create a valid OAuth2 client object.
+		 * 
+		 * @param authEndpoint The authorization endpoint used by the OAuth 2.0 server
+		 * @param tokenEndpoint The token endpoint used by the OAuth 2.0 server
+		 * @param logLevel (Optional) The new log level for the logger to use
+		 */
 		public function OAuth2(authEndpoint:String, tokenEndpoint:String, logLevel:int = -1)
 		{
 			// save endpoint properties
@@ -53,22 +70,47 @@ package com.adobe.protocols.oauth2
 			}  // if statement
 		} // OAuth2
 		
+		/**
+		 * Initiates the access token request workflow with the proper context as
+		 * described by the passed-in grant-type object.  Upon completion, will
+		 * dispatch a <code>GetAccessTokenEvent</code> event.
+		 * 
+		 * @param grantType An <code>IGrantType</code> object which represents the desired workflow to use when requesting an access token
+		 * 
+		 * @see com.adobe.protocols.oauth2.grant.IGrantType
+		 * @see com.adobe.protocols.oauth2.event.GetAccessTokenEvent#TYPE
+		 */
 		public function getAccessToken(grantType:IGrantType):void
 		{
 			if (grantType is AuthorizationCodeGrant)
 			{
+				log.info("Initiating getAccessToken() with authorization code grant type workflow");
 				getAccessTokenWithAuthorizationCodeGrant(grantType as AuthorizationCodeGrant);
-			}
+			}  // if statement
 			else if (grantType is ImplicitGrant)
 			{
+				log.info("Initiating getAccessToken() with implicit grant type workflow");
 				getAccessTokenWithImplicitGrant(grantType as ImplicitGrant);
-			}
+			}  // else-if statement
 			else if (grantType is ResourceOwnerCredentialsGrant)
 			{
+				log.info("Initiating getAccessToken() with resource owner credentials grant type workflow");
 				getAccessTokenWithResourceOwnerCredentialsGrant(grantType as ResourceOwnerCredentialsGrant);
-			}
-		}
+			}  // else-if statement
+		}  // getAccessToken
 		
+		/**
+		 * Initiates request to refresh a given access token.  Upon completion, will dispatch
+		 * a <code>RefreshAccessTokenEvent</code> event.  On success, a new refresh token may
+		 * be issues, at which point the client should discard the old refresh token with the
+		 * new one.
+		 * 
+		 * @param refreshToken A valid refresh token received during last request for an access token
+		 * @param clientId The client identifier
+		 * @param clientSecret The client secret
+		 * 
+		 * @see com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent#TYPE
+		 */
 		public function refreshAccessToken(refreshToken:String, clientId:String, clientSecret:String, scope:String = null):void
 		{
 			// create result event
@@ -131,6 +173,32 @@ package com.adobe.protocols.oauth2
 			}  // onRefreshAccessTokenFault
 		}  // refreshAccessToken
 		
+		/**
+		 * Modifies the log level of the logger.
+		 * 
+		 * <p>Initially, logging is turned off.  Passing in any value will modify the logging level
+		 * of the application.  This method can accept any of the following values...
+		 * 
+		 * <ul>
+		 * 	<li>LogEventLevel.ALL</li>
+		 * 	<li>LogEventLevel.DEBUG</li>
+		 * 	<li>LogEventLevel.ERROR</li>
+		 * 	<li>LogEventLevel.FATAL</li>
+		 * 	<li>LogEventLevel.INFO</li>
+		 * 	<li>LogEventLevel.WARN</li>
+		 * </ul>
+		 * 
+		 * To turn off logging again, simply pass in <code>int.MAX_VALUE</code>.</p>
+		 * 
+		 * @param logEventLevel The new log level for the logger to use
+		 * 
+		 * @see mx.logging.LogEventLevel.ALL
+		 * @see mx.logging.LogEventLevel.DEBUG
+		 * @see mx.logging.LogEventLevel.ERROR
+		 * @see mx.logging.LogEventLevel.FATAL
+		 * @see mx.logging.LogEventLevel.INFO
+		 * @see mx.logging.LogEventLevel.WARN
+		 */
 		public function setLogLevel(logEventLevel:int):void
 		{
 			if (logEventLevel >= 0)
@@ -139,6 +207,11 @@ package com.adobe.protocols.oauth2
 			}  // if statement
 		}  // setLogLevel
 		
+		/**
+		 * @private
+		 * 
+		 * Helper function that completes get-access-token request using the authorization code grant type.
+		 */
 		private function getAccessTokenWithAuthorizationCodeGrant(authorizationCodeGrant:AuthorizationCodeGrant):void
 		{
 			// create result event
@@ -253,6 +326,11 @@ package com.adobe.protocols.oauth2
 			}  // onStageWebViewError
 		}  // getAccessTokenWithAuthorizationCodeGrant
 		
+		/**
+		 * @private
+		 * 
+		 * Helper function that completes get-access-token request using the implicit grant type.
+		 */
 		private function getAccessTokenWithImplicitGrant(implicitGrant:ImplicitGrant):void
 		{
 			// create result event
@@ -305,6 +383,11 @@ package com.adobe.protocols.oauth2
 			}  // onStageWebViewError
 		}  // getAccessTokenWithImplicitGrant
 		
+		/**
+		 * @private
+		 * 
+		 * Helper function that completes get-access-token request using the resource owner password credentials grant type.
+		 */
 		private function getAccessTokenWithResourceOwnerCredentialsGrant(resourceOwnerCredentialsGrant:ResourceOwnerCredentialsGrant):void
 		{
 			// create result event
@@ -368,6 +451,11 @@ package com.adobe.protocols.oauth2
 			}  // onGetAccessTokenFault
 		}  // getAccessTokenWithResourceOwnerCredentialsGrant
 		
+		/**
+		 * @private
+		 * 
+		 * Helper function to extract query from URL and URL fragment.
+		 */
 		private function extractQueryParams(url:String):Object
 		{
 			var delimiter:String = (url.indexOf("?") > 0) ? "?" : "#";
