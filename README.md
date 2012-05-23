@@ -70,4 +70,4 @@ You can find the full ASDocs for the project [here](http://charlesbihis.github.c
 
 ## License
 
-The ActionScript Notification Engine (a.k.a. Project M6D Magnum Sidearm) is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+The ActionScript OAuth 2.0 Library is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
