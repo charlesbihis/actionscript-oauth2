@@ -19,10 +19,12 @@ package com.adobe.protocols.oauth2
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	
-	import mx.logging.ILogger;
-	import mx.logging.Log;
-	import mx.logging.targets.TraceTarget;
-	import mx.utils.ObjectUtil;
+	import org.as3commons.logging.api.ILogger;
+	import org.as3commons.logging.api.LOGGER_FACTORY;
+	import org.as3commons.logging.api.getLogger;
+	import org.as3commons.logging.setup.LevelTargetSetup;
+	import org.as3commons.logging.setup.LogSetupLevel;
+	import org.as3commons.logging.setup.target.TraceTarget;
 
 	/**
 	 * Event that is broadcast when results from a <code>getAccessToken</code> request are received.
@@ -56,11 +58,13 @@ package com.adobe.protocols.oauth2
 	 */
 	public class OAuth2 extends EventDispatcher
 	{
+		private static const log:ILogger = getLogger(OAuth2);
+		
 		private var grantType:IGrantType;
 		private var authEndpoint:String;
 		private var tokenEndpoint:String;
-		private var log:ILogger;
-		private var logTarget:TraceTarget;
+		private var traceTarget:TraceTarget = new TraceTarget();
+		
 		
 		/**
 		 * Constructor to create a valid OAuth2 client object.
@@ -69,27 +73,16 @@ package com.adobe.protocols.oauth2
 		 * @param tokenEndpoint The token endpoint used by the OAuth 2.0 server
 		 * @param logLevel (Optional) The new log level for the logger to use
 		 */
-		public function OAuth2(authEndpoint:String, tokenEndpoint:String, logLevel:int = -1)
+		public function OAuth2(authEndpoint:String, tokenEndpoint:String, logLevel:LogSetupLevel = null)
 		{
 			// save endpoint properties
 			this.authEndpoint = authEndpoint;
 			this.tokenEndpoint = tokenEndpoint;
 			
 			// set up logging
-			logTarget = new TraceTarget();
-			logTarget.includeCategory = true;
-			logTarget.includeDate = true;
-			logTarget.includeLevel = true;
-			logTarget.includeTime = true;
-			logTarget.level = int.MAX_VALUE;
-			Log.addTarget(logTarget);
-			log = Log.getLogger("com.adobe.protocols.oauth2");
-			
-			// initialize logging if optional logging param was passed in
-			if (logLevel >= 0)
-			{
-				setLogLevel(logLevel);
-			}  // if statement
+			traceTarget = new TraceTarget();
+			traceTarget.format = "{date} {time} [{logLevel}] {name} {message}";
+			LOGGER_FACTORY.setup = new LevelTargetSetup(traceTarget, (logLevel == null) ? LogSetupLevel.NONE : logLevel);
 		} // OAuth2
 		
 		/**
@@ -205,37 +198,44 @@ package com.adobe.protocols.oauth2
 		}  // refreshAccessToken
 		
 		/**
-		 * Modifies the log level of the logger.
+		 * Modifies the log level of the logger at runtime.
 		 * 
-		 * <p>Initially, logging is turned off.  Passing in any value will modify the logging level
+		 * <p>By default, logging is turned off.  Passing in any value will modify the logging level
 		 * of the application.  This method can accept any of the following values...
 		 * 
 		 * <ul>
-		 * 	<li>LogEventLevel.ALL</li>
-		 * 	<li>LogEventLevel.DEBUG</li>
-		 * 	<li>LogEventLevel.ERROR</li>
-		 * 	<li>LogEventLevel.FATAL</li>
-		 * 	<li>LogEventLevel.INFO</li>
-		 * 	<li>LogEventLevel.WARN</li>
+		 * 	<li>LogSetupLevel.NONE</li>
+		 *  <li>LogSetupLevel.FATAL</li>
+		 *  <li>LogSetupLevel.FATAL_ONLY</li>
+		 *  <li>LogSetupLevel.ERROR</li>
+		 *  <li>LogSetupLevel.ERROR_ONLY</li>
+		 *  <li>LogSetupLevel.WARN</li>
+		 *  <li>LogSetupLevel.WARN_ONLY</li>
+		 *  <li>LogSetupLevel.INFO</li>
+		 *  <li>LogSetupLevel.INFO_ONLY</li>
+		 *  <li>LogSetupLevel.DEBUG</li>
+		 *  <li>LogSetupLevel.DEBUG_ONLY</li>
+		 *  <li>LogSetupLevel.ALL</li>
 		 * </ul>
 		 * 
-		 * To turn off logging again, simply pass in <code>int.MAX_VALUE</code>.</p>
+		 * @param logLevel The new log level for the logger to use
 		 * 
-		 * @param logEventLevel The new log level for the logger to use
-		 * 
-		 * @see mx.logging.LogEventLevel.ALL
-		 * @see mx.logging.LogEventLevel.DEBUG
-		 * @see mx.logging.LogEventLevel.ERROR
-		 * @see mx.logging.LogEventLevel.FATAL
-		 * @see mx.logging.LogEventLevel.INFO
-		 * @see mx.logging.LogEventLevel.WARN
+		 * @see org.as3commons.logging.setup.LogSetupLevel.NONE
+		 * @see org.as3commons.logging.setup.LogSetupLevel.FATAL
+		 * @see org.as3commons.logging.setup.LogSetupLevel.FATAL_ONLY
+		 * @see org.as3commons.logging.setup.LogSetupLevel.ERROR
+		 * @see org.as3commons.logging.setup.LogSetupLevel.ERROR_ONLY
+		 * @see org.as3commons.logging.setup.LogSetupLevel.WARN
+		 * @see org.as3commons.logging.setup.LogSetupLevel.WARN_ONLY
+		 * @see org.as3commons.logging.setup.LogSetupLevel.INFO
+		 * @see org.as3commons.logging.setup.LogSetupLevel.INFO_ONLY
+		 * @see org.as3commons.logging.setup.LogSetupLevel.DEBUG
+		 * @see org.as3commons.logging.setup.LogSetupLevel.DEBUG_ONLY
+		 * @see org.as3commons.logging.setup.LogSetupLevel.ALL
 		 */
-		public function setLogLevel(logEventLevel:int):void
+		public function setLogLevel(logLevel:LogSetupLevel):void
 		{
-			if (logEventLevel >= 0)
-			{
-				logTarget.level = logEventLevel;
-			}  // if statement
+			LOGGER_FACTORY.setup = new LevelTargetSetup(traceTarget, logLevel);
 		}  // setLogLevel
 		
 		/**
@@ -307,7 +307,7 @@ package com.adobe.protocols.oauth2
 					}  // if statement
 					else
 					{
-						log.error("Error encountered during authorization request:\n" + ObjectUtil.toString(queryParams));
+						log.error("Error encountered during authorization request");
 						getAccessTokenEvent.errorCode = queryParams.error;
 						getAccessTokenEvent.errorMessage = queryParams.error_description;
 						dispatchEvent(getAccessTokenEvent);
@@ -358,7 +358,7 @@ package com.adobe.protocols.oauth2
 			
 			function onStageWebViewError(event:ErrorEvent):void
 			{
-				log.error("Error occurred with StageWebView: " + ObjectUtil.toString(event));
+				log.error("Error occurred with StageWebView: " + event);
 				getAccessTokenEvent.errorCode = "STAGE_WEB_VIEW_ERROR";
 				getAccessTokenEvent.errorMessage = "Error occurred with StageWebView";
 				dispatchEvent(getAccessTokenEvent);
@@ -405,7 +405,7 @@ package com.adobe.protocols.oauth2
 					}  // if statement
 					else
 					{
-						log.error("Error encountered during access token request:\n" + ObjectUtil.toString(queryParams));
+						log.error("Error encountered during access token request");
 						getAccessTokenEvent.errorCode = queryParams.error;
 						getAccessTokenEvent.errorMessage = queryParams.error_description;
 						dispatchEvent(getAccessTokenEvent);
@@ -415,7 +415,7 @@ package com.adobe.protocols.oauth2
 			
 			function onStageWebViewError(event:ErrorEvent):void
 			{
-				log.error("Error occurred with StageWebView: " + ObjectUtil.toString(event));
+				log.error("Error occurred with StageWebView: " + event);
 				getAccessTokenEvent.errorCode = "STAGE_WEB_VIEW_ERROR";
 				getAccessTokenEvent.errorMessage = "Error occurred with StageWebView";
 				dispatchEvent(getAccessTokenEvent);
