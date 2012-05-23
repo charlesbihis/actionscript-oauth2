@@ -11,7 +11,7 @@ This library is built for use with Flash/Flex/AIR projects to facilitate communi
 The ActionScript OAuth 2.0 Library supports the following features...
 
 * Ability to [fetch an access token](http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4) via the OAuth 2.0 supported workflows...
-** [Authorization Code Grant workflow](http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.1)
+* * [Authorization Code Grant workflow](http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.1)
 ** [Implicit Grant workflow](http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.2)
 ** [Resource Owner Password Credentials workflow](http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.3)
 * Ability to [refresh an access token](http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-6)
