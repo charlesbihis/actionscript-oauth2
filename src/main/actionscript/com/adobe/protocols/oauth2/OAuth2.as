@@ -1,6 +1,5 @@
 package com.adobe.protocols.oauth2
 {
-	import com.adobe.protocols.dict.events.ErrorEvent;
 	import com.adobe.protocols.oauth2.event.GetAccessTokenEvent;
 	import com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent;
 	import com.adobe.protocols.oauth2.grant.AuthorizationCodeGrant;
@@ -9,17 +8,20 @@ package com.adobe.protocols.oauth2
 	import com.adobe.protocols.oauth2.grant.ResourceOwnerCredentialsGrant;
 	import com.adobe.serialization.json.JSONParseError;
 	
+	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.IOErrorEvent;
 	import flash.events.LocationChangeEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
+	import flash.net.URLRequestMethod;
+	import flash.net.URLVariables;
 	
 	import mx.logging.ILogger;
 	import mx.logging.Log;
 	import mx.logging.targets.TraceTarget;
-	import mx.rpc.CallResponder;
-	import mx.rpc.events.FaultEvent;
-	import mx.rpc.events.ResultEvent;
-	import mx.rpc.http.HTTPService;
 	import mx.utils.ObjectUtil;
 
 	/**
@@ -136,61 +138,70 @@ package com.adobe.protocols.oauth2
 			// create result event
 			var refreshAccessTokenEvent:RefreshAccessTokenEvent = new RefreshAccessTokenEvent();
 			
-			// set up HTTP-service call
-			var httpService:HTTPService = new HTTPService();
-			httpService.url = tokenEndpoint;
-			httpService.method = "POST";
-			httpService.contentType = "application/x-www-form-urlencoded";
+			// set up URL request
+			var urlRequest:URLRequest = new URLRequest(tokenEndpoint);
+			var urlLoader:URLLoader = new URLLoader();
+			urlRequest.method = URLRequestMethod.POST;
 			
-			// set up parameters
-			var args:Object = new Object();
-			args.grant_type = "refresh_token";
-			args.client_id = clientId;
-			args.client_secret = clientSecret;
-			args.refresh_token = refreshToken;
-			args.scope = scope;
+			// define POST parameters
+			var urlVariables : URLVariables = new URLVariables();  
+			urlVariables.grant_type = "refresh_token"; 
+			urlVariables.client_id = clientId;
+			urlVariables.client_secret = clientSecret;
+			urlVariables.refresh_token = refreshToken;
+			urlVariables.scope = scope;
+			urlRequest.data = urlVariables;
+			
+			// attach event listeners
+			urlLoader.addEventListener(Event.COMPLETE, onRefreshAccessTokenResult);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onRefreshAccessTokenError);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onRefreshAccessTokenError);
 			
 			// make the call
-			var getTokenResponder:CallResponder = new CallResponder();
-			getTokenResponder.addEventListener(ResultEvent.RESULT, onRefreshAccessTokenResult);
-			getTokenResponder.addEventListener(FaultEvent.FAULT, onRefreshAccessTokenFault);
-			getTokenResponder.token = httpService.send(args);
+			try
+			{
+				urlLoader.load(urlRequest);
+			}  // try statement
+			catch (error:Error)
+			{
+				log.error("Error loading token endpoint \"" + tokenEndpoint + "\"");
+			}  // catch statement
 			
-			function onRefreshAccessTokenResult(event:ResultEvent):void
+			function onRefreshAccessTokenResult(event:Event):void
 			{
 				try
 				{
-					var response:Object = com.adobe.serialization.json.JSON.decode(getTokenResponder.lastResult);
-					log.debug("Refresh access token response received with values:\n" + ObjectUtil.toString(response));
+					var response:Object = com.adobe.serialization.json.JSON.decode(event.target.data);
+					log.debug("Access token: " + response.access_token);
 					refreshAccessTokenEvent.parseAccessTokenResponse(response);
 				}  // try statement
 				catch (error:JSONParseError)
 				{
 					refreshAccessTokenEvent.errorCode = "com.adobe.serialization.json.JSONParseError";
-					refreshAccessTokenEvent.errorMessage = "Error parsing output from refresh access token response: \"" + getTokenResponder.lastResult + "\"";					
+					refreshAccessTokenEvent.errorMessage = "Error parsing output from refresh access token response";					
 				}  // catch statement
 				
 				dispatchEvent(refreshAccessTokenEvent);
 			}  // onRefreshAccessTokenResult
 			
-			function onRefreshAccessTokenFault(event:FaultEvent):void
+			function onRefreshAccessTokenError(event:Event):void
 			{
-				log.error("Error encountered during refresh access token request:\n" + ObjectUtil.toString(event.fault.content));
+				log.error("Error encountered during refresh access token request: " + event);
 				
 				try
 				{
-					var fault:Object = com.adobe.serialization.json.JSON.decode(event.fault.content as String);
-					refreshAccessTokenEvent.errorCode = fault.error;
-					refreshAccessTokenEvent.errorMessage = fault.error_description;
+					var error:Object = com.adobe.serialization.json.JSON.decode(event.target.data);
+					refreshAccessTokenEvent.errorCode = error.error;
+					refreshAccessTokenEvent.errorMessage = error.error_description;
 				}  // try statement
 				catch (error:JSONParseError)
 				{
 					refreshAccessTokenEvent.errorCode = "Unknown";
-					refreshAccessTokenEvent.errorMessage = "Error encountered during refresh access token request.  Unable to parse fault message: \"" + event.fault.content + "\"";
+					refreshAccessTokenEvent.errorMessage = "Error encountered during refresh access token request.  Unable to parse error message.";
 				}  // catch statement
 				
 				dispatchEvent(refreshAccessTokenEvent);
-			}  // onRefreshAccessTokenFault
+			}  // onRefreshAccessTokenError
 		}  // refreshAccessToken
 		
 		/**
@@ -265,26 +276,34 @@ package com.adobe.protocols.oauth2
 					{
 						log.debug("Authorization code: " + code);
 						
-						// set up HTTP-service call
-						var httpService:HTTPService = new HTTPService();
-						httpService.url = tokenEndpoint;
-						httpService.method = "POST";
-						httpService.contentType = "application/x-www-form-urlencoded";
+						// set up URL request
+						var urlRequest:URLRequest = new URLRequest(tokenEndpoint);
+						var urlLoader:URLLoader = new URLLoader();
+						urlRequest.method = URLRequestMethod.POST;
 						
-						// set up parameters
-						var args:Object = new Object();
-						args.grant_type = "authorization_code";
-						args.code = code;
-						args.redirect_uri = authorizationCodeGrant.redirectUri;
-						args.client_id = authorizationCodeGrant.clientId;
-						args.client_secret = authorizationCodeGrant.clientSecret;
+						// define POST parameters
+						var urlVariables : URLVariables = new URLVariables();  
+						urlVariables.grant_type = "authorization_code"; 
+						urlVariables.code = code;
+						urlVariables.redirect_uri = authorizationCodeGrant.redirectUri;
+						urlVariables.client_id = authorizationCodeGrant.clientId;
+						urlVariables.client_secret = authorizationCodeGrant.clientSecret;
+						urlRequest.data = urlVariables;
+						
+						// attach event listeners
+						urlLoader.addEventListener(Event.COMPLETE, onGetAccessTokenResult);
+						urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onGetAccessTokenError);
+						urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onGetAccessTokenError);
 						
 						// make the call
-						log.debug("Sending access token request with the following values:\n" + ObjectUtil.toString(args));
-						var getTokenResponder:CallResponder = new CallResponder();
-						getTokenResponder.addEventListener(ResultEvent.RESULT, onGetAccessTokenResult);
-						getTokenResponder.addEventListener(FaultEvent.FAULT, onGetAccessTokenFault);
-						getTokenResponder.token = httpService.send(args);
+						try
+						{
+							urlLoader.load(urlRequest);
+						}  // try statement
+						catch (error:Error)
+						{
+							log.error("Error loading token endpoint \"" + tokenEndpoint + "\"");
+						}  // catch statement
 					}  // if statement
 					else
 					{
@@ -295,41 +314,41 @@ package com.adobe.protocols.oauth2
 					}  // else statement
 				}  // if statement
 				
-				function onGetAccessTokenResult(event:ResultEvent):void
+				function onGetAccessTokenResult(event:Event):void
 				{
 					try
 					{
-						var response:Object = com.adobe.serialization.json.JSON.decode(getTokenResponder.lastResult);
-						log.debug("Access token response received with values:\n" + ObjectUtil.toString(response));
+						var response:Object = com.adobe.serialization.json.JSON.decode(event.target.data);
+						log.debug("Access token: " + response.access_token);
 						getAccessTokenEvent.parseAccessTokenResponse(response);
 					}  // try statement
 					catch (error:JSONParseError)
 					{
 						getAccessTokenEvent.errorCode = "com.adobe.serialization.json.JSONParseError";
-						getAccessTokenEvent.errorMessage = "Error parsing output from access token response: \"" + getTokenResponder.lastResult + "\"";
+						getAccessTokenEvent.errorMessage = "Error parsing output from access token response";
 					}  // catch statement
 					
 					dispatchEvent(getAccessTokenEvent);
 				}  // onGetAccessTokenResult
 				
-				function onGetAccessTokenFault(event:FaultEvent):void
+				function onGetAccessTokenError(event:Event):void
 				{
-					log.error("Error encountered during access token request:\n" + ObjectUtil.toString(event.fault.content));
+					log.error("Error encountered during access token request: " + event);
 					
 					try
 					{
-						var fault:Object = com.adobe.serialization.json.JSON.decode(event.fault.content as String);
-						getAccessTokenEvent.errorCode = fault.error;
-						getAccessTokenEvent.errorMessage = fault.error_description;
+						var error:Object = com.adobe.serialization.json.JSON.decode(event.target.data);
+						getAccessTokenEvent.errorCode = error.error;
+						getAccessTokenEvent.errorMessage = error.error_description;
 					}  // try statement
 					catch (error:JSONParseError)
 					{
 						getAccessTokenEvent.errorCode = "Unknown";
-						getAccessTokenEvent.errorMessage = "Error encountered during access token request.  Unable to parse fault message: \"" + event.fault.content + "\"";
+						getAccessTokenEvent.errorMessage = "Error encountered during access token request.  Unable to parse error message.";
 					}  // catch statement
 					
 					dispatchEvent(getAccessTokenEvent);
-				}  // onGetAccessTokenFault
+				}  // onGetAccessTokenError
 			}  // onLocationChange
 			
 			function onStageWebViewComplete(event:Event):void
@@ -413,62 +432,71 @@ package com.adobe.protocols.oauth2
 			// create result event
 			var getAccessTokenEvent:GetAccessTokenEvent = new GetAccessTokenEvent();
 			
-			// set up HTTP-service call
-			var httpService:HTTPService = new HTTPService();
-			httpService.url = tokenEndpoint;
-			httpService.method = "POST";
-			httpService.contentType = "application/x-www-form-urlencoded";
+			// set up URL request
+			var urlRequest:URLRequest = new URLRequest(tokenEndpoint);
+			var urlLoader:URLLoader = new URLLoader();
+			urlRequest.method = URLRequestMethod.POST;
 			
-			// set up parameters
-			var args:Object = new Object();
-			args.grant_type = "password";
-			args.client_id = resourceOwnerCredentialsGrant.clientId;
-			args.client_secret = resourceOwnerCredentialsGrant.clientSecret;
-			args.username = resourceOwnerCredentialsGrant.username;
-			args.password = resourceOwnerCredentialsGrant.password;
-			args.scope = resourceOwnerCredentialsGrant.scope;
+			// define POST parameters
+			var urlVariables : URLVariables = new URLVariables();  
+			urlVariables.grant_type = "password";
+			urlVariables.client_id = resourceOwnerCredentialsGrant.clientId;
+			urlVariables.client_secret = resourceOwnerCredentialsGrant.clientSecret;
+			urlVariables.username = resourceOwnerCredentialsGrant.username;
+			urlVariables.password = resourceOwnerCredentialsGrant.password;
+			urlVariables.scope = resourceOwnerCredentialsGrant.scope;
+			urlRequest.data = urlVariables;
+			
+			// attach event listeners
+			urlLoader.addEventListener(Event.COMPLETE, onGetAccessTokenResult);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onGetAccessTokenError);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onGetAccessTokenError);
 			
 			// make the call
-			var getTokenResponder:CallResponder = new CallResponder();
-			getTokenResponder.addEventListener(ResultEvent.RESULT, onGetAccessTokenResult);
-			getTokenResponder.addEventListener(FaultEvent.FAULT, onGetAccessTokenFault);
-			getTokenResponder.token = httpService.send(args);
+			try
+			{
+				urlLoader.load(urlRequest);
+			}  // try statement
+			catch (error:Error)
+			{
+				log.error("Error loading token endpoint \"" + tokenEndpoint + "\"");
+			}  // catch statement
 			
-			function onGetAccessTokenResult(event:ResultEvent):void
+			function onGetAccessTokenResult(event:Event):void
 			{
 				try
 				{
-					var response:Object = com.adobe.serialization.json.JSON.decode(getTokenResponder.lastResult);
-					log.debug("Access token response received with values:\n" + ObjectUtil.toString(response));
+					var response:Object = com.adobe.serialization.json.JSON.decode(event.target.data);
+					log.debug("Access token: " + response.access_token);
 					getAccessTokenEvent.parseAccessTokenResponse(response);
 				}  // try statement
 				catch (error:JSONParseError)
 				{
 					getAccessTokenEvent.errorCode = "com.adobe.serialization.json.JSONParseError";
-					getAccessTokenEvent.errorMessage = "Error parsing output from access token response: \"" + getTokenResponder.lastResult + "\"";
+					getAccessTokenEvent.errorMessage = "Error parsing output from access token response";
 				}  // catch statement
 				
 				dispatchEvent(getAccessTokenEvent);
 			}  // onGetAccessTokenResult
 			
-			function onGetAccessTokenFault(event:FaultEvent):void
+			function onGetAccessTokenError(event:Event):void
 			{
-				log.error("Error encountered during access token request:\n" + ObjectUtil.toString(event.fault.content));
+				log.error("Error encountered during access token request: " + event);
 				
 				try
 				{
-					var fault:Object = com.adobe.serialization.json.JSON.decode(event.fault.content as String);
-					getAccessTokenEvent.errorCode = fault.error;
-					getAccessTokenEvent.errorMessage = fault.error_description;
+					var error:Object = com.adobe.serialization.json.JSON.decode(event.target.data);
+					getAccessTokenEvent.errorCode = error.error;
+					getAccessTokenEvent.errorMessage = error.error_description;
 				}  // try statement
 				catch (error:JSONParseError)
 				{
 					getAccessTokenEvent.errorCode = "Unknown";
-					getAccessTokenEvent.errorMessage = "Error encountered during access token request.  Unable to parse fault message: \"" + event.fault.content + "\"";
+					getAccessTokenEvent.errorMessage = "Error encountered during access token request.  Unable to parse error message.";
 				}  // catch statement
 				
 				dispatchEvent(getAccessTokenEvent);
-			}  // onGetAccessTokenFault
+			}  // onGetAccessTokenError
 		}  // getAccessTokenWithResourceOwnerCredentialsGrant
 		
 		/**
