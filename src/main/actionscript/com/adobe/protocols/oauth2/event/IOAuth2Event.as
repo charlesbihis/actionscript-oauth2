@@ -3,9 +3,7 @@ package com.adobe.protocols.oauth2.event
 	/**
 	 * Interface describing generic OAuth 2.0 events.
 	 * 
-	 * @author Charles Bihis (charles@whoischarles.com)
-	 * @langversion ActionScript 3.0
-	 * @playerversion Flash 10
+	 * @author Charles Bihis (www.whoischarles.com)
 	 */
 	public interface IOAuth2Event
 	{

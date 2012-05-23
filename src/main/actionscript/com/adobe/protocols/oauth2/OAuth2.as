@@ -52,9 +52,7 @@ package com.adobe.protocols.oauth2
 	 * 
 	 * @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15
 	 * 
-	 * @author Charles Bihis (charles@whoischarles.com)
-	 * @langversion ActionScript 3.0
-	 * @playerversion Flash 10.0
+	 * @author Charles Bihis (www.whoischarles.com)
 	 */
 	public class OAuth2 extends EventDispatcher
 	{
@@ -201,7 +199,7 @@ package com.adobe.protocols.oauth2
 		 * Modifies the log level of the logger at runtime.
 		 * 
 		 * <p>By default, logging is turned off.  Passing in any value will modify the logging level
-		 * of the application.  This method can accept any of the following values...
+		 * of the application.  This method can accept any of the following values...</p>
 		 * 
 		 * <ul>
 		 * 	<li>LogSetupLevel.NONE</li>

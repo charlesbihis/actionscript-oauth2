@@ -6,9 +6,7 @@ package com.adobe.protocols.oauth2.grant
 	 * Class to encapsulate all of the relevant properties used during
 	 * a get-access-token request using the authorization code grant type.
 	 * 
-	 * @author Charles Bihis (charles@whoischarles.com)
-	 * @langversion ActionScript 3.0
-	 * @playerversion Flash 10
+	 * @author Charles Bihis (www.whoischarles.com)
 	 */
 	public class AuthorizationCodeGrant implements IGrantType
 	{

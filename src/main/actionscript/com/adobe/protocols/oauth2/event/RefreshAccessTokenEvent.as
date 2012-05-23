@@ -6,9 +6,7 @@ package com.adobe.protocols.oauth2.event
 	 * Event that is broadcast when results from a <code>refreshAccessToken</code>
 	 * request are received.
 	 * 
-	 * @author Charles Bihis (charles@whoischarles.com)
-	 * @langversion ActionScript 3.0
-	 * @playerversion Flash 10
+	 * @author Charles Bihis (www.whoischarles.com)
 	 */
 	public class RefreshAccessTokenEvent extends Event implements IOAuth2Event
 	{

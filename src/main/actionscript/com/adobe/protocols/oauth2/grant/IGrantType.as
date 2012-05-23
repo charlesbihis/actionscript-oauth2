@@ -8,9 +8,7 @@ package com.adobe.protocols.oauth2.grant
 	 * 
 	 * @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4
 	 * 
-	 * @author Charles Bihis (charles@whoischarles.com)
-	 * @langversion ActionScript 3.0
-	 * @playerversion Flash 10
+	 * @author Charles Bihis (www.whoischarles.com)
 	 */
 	public interface IGrantType
 	{

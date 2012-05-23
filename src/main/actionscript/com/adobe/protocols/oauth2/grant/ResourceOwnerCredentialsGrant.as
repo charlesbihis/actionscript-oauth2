@@ -5,9 +5,7 @@ package com.adobe.protocols.oauth2.grant
 	 * a get-access-token request using the resource owner password
 	 * credentials grant type.
 	 * 
-	 * @author Charles Bihis (charles@whoischarles.com)
-	 * @langversion ActionScript 3.0
-	 * @playerversion Flash 10
+	 * @author Charles Bihis (www.hoischarles.com)
 	 */
 	public class ResourceOwnerCredentialsGrant implements IGrantType
 	{
