@@ -59,7 +59,7 @@ To use the library, simply drop in the SWC (or the source) into your project, al
 
 ### Reference
 
-You can find the full ASDocs for the project [here](http://charlesbihis.github.com/actionscript-notification-engine/docs/).
+You can find the full ASDocs for the project [here](http://charlesbihis.github.com/actionscript-oauth2/docs/).
 
 ## Author
 
