@@ -34,11 +34,11 @@ To use the library, simply drop in the SWC (or the source) into your project, al
 	// set up the call
 	var oauth2:OAuth2 = new OAuth2("https://accounts.google.com/o/oauth2/auth", "https://accounts.google.com/o/oauth2/token", LogSetupLevel.ALL);
 	var grant:IGrantType = new AuthorizationCodeGrant(stageWebView,						// the StageWebView object for which to display the user consent screen
-														"INSERT_CLIENT_ID_HERE",		// your client ID
-														"INSERT_CLIENT_SECRET_HERE",	// your client secret
-														"INSERT_REDIRECT_URI_HERE",		// your redirect URI
-														"INSERT_SCOPE_HERE",			// (optional) your scope
-														"INSERT_STATE_HERE");			// (optional) your state
+													  "INSERT_CLIENT_ID_HERE",			// your client ID
+													  "INSERT_CLIENT_SECRET_HERE",		// your client secret
+													  "INSERT_REDIRECT_URI_HERE",		// your redirect URI
+													  "INSERT_SCOPE_HERE",				// (optional) your scope
+													  "INSERT_STATE_HERE");				// (optional) your state
 	 
 	// make the call
 	oauth2.addEventListener(GetAccessTokenEvent.TYPE, onGetAccessToken);
