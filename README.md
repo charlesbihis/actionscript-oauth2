@@ -60,6 +60,11 @@ To use the library, simply drop in the SWC (or the source) into your project, al
 		}
 	}  // onGetAccessToken
 
+### Demo
+
+* Demo description: http://blogs.adobe.com/charles/2012/05/oauth-2-0-library-for-actionscript.html
+* Demo source: https://github.com/charlesbihis/sandbox/tree/master/actionscript/actionscript-oauth2-mobile-demo
+
 ### Documentation
 
 You can find the full ASDocs for the project [here](http://charlesbihis.github.com/actionscript-oauth2/docs/).
