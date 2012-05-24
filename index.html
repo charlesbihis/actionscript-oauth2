@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>actionscript-oauth2 by charlesbihis</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>actionscript-oauth2</h1>
+        <p>An ActionScript 3 library for interfacing with OAuth 2.0 services</p>
+        <p class="view"><a href="https://github.com/charlesbihis/actionscript-oauth2">View the Project on GitHub <small>charlesbihis/actionscript-oauth2</small></a></p>
+        <ul>
+          <li><a href="https://github.com/charlesbihis/actionscript-oauth2/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/charlesbihis/actionscript-oauth2/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/charlesbihis/actionscript-oauth2">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>ActionScript OAuth 2.0 Library</h1>
+
+<p>An ActionScript 3 library for interfacing with OAuth 2.0 services, implemented according to the <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-15">OAuth 2.0 v2.15 specification</a>.</p>
+
+<h2>Overview</h2>
+
+<p>This library is built for use with Flash/Flex/AIR projects to facilitate communication with OAuth 2.0 services.  It provides mechanisms to authenticate against OAuth 2.0 servers using all standard authentication and authorization workflows.</p>
+
+<p>This project was first mentioned in my blog post at <a href="http://blogs.adobe.com/charles/2012/05/oauth-2-0-library-for-actionscript.html">http://blogs.adobe.com/charles/2012/05/oauth-2-0-library-for-actionscript.html</a>.</p>
+
+<h3>Features</h3>
+
+<p>The ActionScript OAuth 2.0 Library supports the following features...</p>
+
+<ul>
+<li>Ability to <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4">fetch an access token</a> via the OAuth 2.0 supported workflows...
+
+<ul>
+<li><a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.1">Authorization Code Grant workflow</a></li>
+<li><a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.2">Implicit Grant workflow</a></li>
+<li><a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.3">Resource Owner Password Credentials workflow</a></li>
+</ul>
+</li>
+<li>Ability to <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-6">refresh an access token</a>
+</li>
+<li>Robust and adjustable logging</li>
+<li>Ability to log in, view, and interact with the user consent page within a given StageWebView object </li>
+</ul><h3>Dependencies</h3>
+
+<ul>
+<li><a href="https://github.com/mikechambers/as3corelib">as3corelib</a></li>
+<li><a href="http://code.google.com/p/as3-commons/">as3commons-logging</a></li>
+</ul><h2>Reference</h2>
+
+<h3>Usage</h3>
+
+<p>To use the library, simply drop in the SWC (or the source) into your project, along with the appropriate dependencies, and follow the usage below...</p>
+
+<pre><code>// set up our StageWebView object to use our visible stage
+stageWebView.stage = stage;
+
+// set up the call
+var oauth2:OAuth2 = new OAuth2("https://accounts.google.com/o/oauth2/auth", "https://accounts.google.com/o/oauth2/token", LogSetupLevel.ALL);
+var grant:IGrantType = new AuthorizationCodeGrant(stageWebView,                     // the StageWebView object for which to display the user consent screen
+                                                  "INSERT_CLIENT_ID_HERE",          // your client ID
+                                                  "INSERT_CLIENT_SECRET_HERE",      // your client secret
+                                                  "INSERT_REDIRECT_URI_HERE",       // your redirect URI
+                                                  "INSERT_SCOPE_HERE",              // (optional) your scope
+                                                  "INSERT_STATE_HERE");             // (optional) your state
+
+// make the call
+oauth2.addEventListener(GetAccessTokenEvent.TYPE, onGetAccessToken);
+oauth2.getAccessToken(grant);
+
+function onGetAccessToken(getAccessTokenEvent:GetAccessTokenEvent):void
+{
+    if (getAccessTokenEvent.errorCode == null &amp;&amp; getAccessTokenEvent.errorMessage == null)
+    {
+        // success!
+        trace("Your access token value is: " + getAccessTokenEvent.accessToken);
+    }
+    else
+    {
+        // fail :(
+    }
+}  // onGetAccessToken
+</code></pre>
+
+<h3>Demo</h3>
+
+<ul>
+<li>Demo description: <a href="http://blogs.adobe.com/charles/2012/05/oauth-2-0-library-for-actionscript.html">http://blogs.adobe.com/charles/2012/05/oauth-2-0-library-for-actionscript.html</a>
+</li>
+<li>Demo source: <a href="https://github.com/charlesbihis/sandbox/tree/master/actionscript/actionscript-oauth2-mobile-demo">https://github.com/charlesbihis/sandbox/tree/master/actionscript/actionscript-oauth2-mobile-demo</a>
+</li>
+</ul><h3>Documentation</h3>
+
+<p>You can find the full ASDocs for the project <a href="http://charlesbihis.github.com/actionscript-oauth2/docs/">here</a>.</p>
+
+<h2>Author</h2>
+
+<ul>
+<li>Created by Charles Bihis</li>
+<li>Website: <a href="http://www.whoischarles.com">www.whoischarles.com</a>
+</li>
+<li>E-mail: <a href="mailto:charles@whoischarles.com">charles@whoischarles.com</a>
+</li>
+<li>Twitter: <a href="http://www.twitter.com/charlesbihis">@charlesbihis</a>
+</li>
+</ul><h2>License</h2>
+
+<p>The ActionScript OAuth 2.0 Library is licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/charlesbihis">charlesbihis</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
