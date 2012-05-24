@@ -6,6 +6,8 @@ An ActionScript 3 library for interfacing with OAuth 2.0 services, implemented a
 
 This library is built for use with Flash/Flex/AIR projects to facilitate communication with OAuth 2.0 services.  It provides mechanisms to authenticate against OAuth 2.0 servers using all standard authentication and authorization workflows.
 
+This project was first mentioned in my blog post at http://blogs.adobe.com/charles/2012/05/oauth-2-0-library-for-actionscript.html.
+
 ### Features
 
 The ActionScript OAuth 2.0 Library supports the following features...
