@@ -21,10 +21,11 @@ The ActionScript OAuth 2.0 Library supports the following features...
 * Ability to log in, view, and interact with the user consent page within a given StageWebView object 
 
 ### Dependencies
+
 * [as3corelib](https://github.com/mikechambers/as3corelib)
 * [as3commons-logging](http://code.google.com/p/as3-commons/)
 
-## Documentation
+## Reference
 
 ### Usage
 
@@ -59,7 +60,7 @@ To use the library, simply drop in the SWC (or the source) into your project, al
 		}
 	}  // onGetAccessToken
 
-### Reference
+### Documentation
 
 You can find the full ASDocs for the project [here](http://charlesbihis.github.com/actionscript-oauth2/docs/).
 
