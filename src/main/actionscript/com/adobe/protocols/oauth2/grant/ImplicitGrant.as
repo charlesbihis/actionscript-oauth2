@@ -15,6 +15,7 @@ package com.adobe.protocols.oauth2.grant
 		private var _redirectUri:String;
 		private var _scope:String;
 		private var _state:Object;
+		private var _queryParams:Object;
 		
 		/**
 		 * Constructor.
@@ -24,14 +25,16 @@ package com.adobe.protocols.oauth2.grant
 		 * @param redirectUri The redirect URI to return to after the authorization process has completed
 		 * @param scope (Optional) The scope of the access request expressed as a list of space-delimited, case-sensitive strings
 		 * @param state (Optional) An opaque value used by the client to maintain state between the request and callback
+		 * @param queryParams (Optional) Additional query parameters that can be passed to the authorization URL
 		 */
-		public function ImplicitGrant(stageWebView:StageWebView, clientId:String, redirectUri:String, scope:String = null, state:Object = null)
+		public function ImplicitGrant(stageWebView:StageWebView, clientId:String, redirectUri:String, scope:String = null, state:Object = null, queryParams:Object = null)
 		{
 			_stageWebView = stageWebView;
 			_clientId = clientId;
 			_redirectUri = redirectUri;
 			_scope = scope;
 			_state = state;
+			_queryParams = queryParams;
 		}  // ImplicitGrant
 		
 		/**
@@ -83,6 +86,14 @@ package com.adobe.protocols.oauth2.grant
 		}  // state
 		
 		/**
+		 * Additional query parameters that can be passed to the authorization URL.
+		 */
+		public function get queryParams():Object
+		{
+			return _queryParams;
+		}  // queryParams
+		
+		/**
 		 * Convenience method for getting the full authorization URL.
 		 */
 		public function getFullAuthUrl(endpoint:String):String
@@ -99,6 +110,15 @@ package com.adobe.protocols.oauth2.grant
 			if (state != null)
 			{
 				url += "&state=" + state;
+			}  // if statement
+			
+			// add additional optional query params, if any
+			if (queryParams != null)
+			{
+				for (var queryParam:String in queryParams)
+				{
+					url += "&" + queryParam + "=" + queryParams[queryParam];
+				}  // for loop
 			}  // if statement
 			
 			return url;
