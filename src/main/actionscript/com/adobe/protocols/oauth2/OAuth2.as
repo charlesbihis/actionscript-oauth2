@@ -136,7 +136,7 @@ package com.adobe.protocols.oauth2
 			
 			// define POST parameters
 			var urlVariables : URLVariables = new URLVariables();  
-			urlVariables.grant_type = "refresh_token"; 
+			urlVariables.grant_type = OAuth2Const.GRANT_TYPE_REFRESH_TOKEN; 
 			urlVariables.client_id = clientId;
 			urlVariables.client_secret = clientSecret;
 			urlVariables.refresh_token = refreshToken;
@@ -260,7 +260,7 @@ package com.adobe.protocols.oauth2
 			function onLocationChanging(locationChangeEvent:LocationChangeEvent):void
 			{
 				log.info("Loading URL: " + locationChangeEvent.location);
-				if (locationChangeEvent.location.indexOf(authorizationCodeGrant.redirectUri) == 0)
+				if (locationChangeEvent.location.indexOf(authorizationCodeGrant.redirectUri) == 0 && locationChangeEvent.location.indexOf(OAuth2Const.RESPONSE_PROPERTY_AUTHORIZATION_CODE) > 0)
 				{
 					log.info("Redirect URI encountered (" + authorizationCodeGrant.redirectUri + ").  Extracting values from path.");
 					
@@ -281,7 +281,7 @@ package com.adobe.protocols.oauth2
 						
 						// define POST parameters
 						var urlVariables : URLVariables = new URLVariables();  
-						urlVariables.grant_type = "authorization_code"; 
+						urlVariables.grant_type = OAuth2Const.GRANT_TYPE_AUTHORIZATION_CODE; 
 						urlVariables.code = code;
 						urlVariables.redirect_uri = authorizationCodeGrant.redirectUri;
 						urlVariables.client_id = authorizationCodeGrant.clientId;
@@ -354,9 +354,9 @@ package com.adobe.protocols.oauth2
 				log.info("Auth URL loading complete after " + (new Date().time - startTime) + "ms");
 			}  // onStageWebViewComplete
 			
-			function onStageWebViewError(event:ErrorEvent):void
+			function onStageWebViewError(errorEvent:ErrorEvent):void
 			{
-				log.error("Error occurred with StageWebView: " + event);
+				log.error("Error occurred with StageWebView: " + errorEvent);
 				getAccessTokenEvent.errorCode = "STAGE_WEB_VIEW_ERROR";
 				getAccessTokenEvent.errorMessage = "Error occurred with StageWebView";
 				dispatchEvent(getAccessTokenEvent);
@@ -382,18 +382,18 @@ package com.adobe.protocols.oauth2
 			log.info("Loading auth URL: " + implicitGrant.getFullAuthUrl(authEndpoint));
 			implicitGrant.stageWebView.loadURL(implicitGrant.getFullAuthUrl(authEndpoint));
 			
-			function onLocationChange(event:LocationChangeEvent):void
+			function onLocationChange(locationChangeEvent:LocationChangeEvent):void
 			{
-				log.info("Loading URL: " + event.location);
-				if (event.location.indexOf(implicitGrant.redirectUri) == 0)
+				log.info("Loading URL: " + locationChangeEvent.location);
+				if (locationChangeEvent.location.indexOf(implicitGrant.redirectUri) == 0 && locationChangeEvent.location.indexOf(OAuth2Const.RESPONSE_PROPERTY_ACCESS_TOKEN) > 0)
 				{
 					log.info("Redirect URI encountered (" + implicitGrant.redirectUri + ").  Extracting values from path.");
 					
 					// stop event from propogating
-					event.preventDefault();
+					locationChangeEvent.preventDefault();
 					
 					// determine if authorization was successful
-					var queryParams:Object = extractQueryParams(event.location);
+					var queryParams:Object = extractQueryParams(locationChangeEvent.location);
 					var accessToken:String = queryParams.access_token;
 					if (accessToken != null)
 					{
@@ -411,9 +411,9 @@ package com.adobe.protocols.oauth2
 				}  // if statement
 			}  // onLocationChange
 			
-			function onStageWebViewError(event:ErrorEvent):void
+			function onStageWebViewError(errorEvent:ErrorEvent):void
 			{
-				log.error("Error occurred with StageWebView: " + event);
+				log.error("Error occurred with StageWebView: " + errorEvent);
 				getAccessTokenEvent.errorCode = "STAGE_WEB_VIEW_ERROR";
 				getAccessTokenEvent.errorMessage = "Error occurred with StageWebView";
 				dispatchEvent(getAccessTokenEvent);
@@ -437,7 +437,7 @@ package com.adobe.protocols.oauth2
 			
 			// define POST parameters
 			var urlVariables : URLVariables = new URLVariables();  
-			urlVariables.grant_type = "password";
+			urlVariables.grant_type = OAuth2Const.GRANT_TYPE_RESOURCE_OWNER_CREDENTIALS;
 			urlVariables.client_id = resourceOwnerCredentialsGrant.clientId;
 			urlVariables.client_secret = resourceOwnerCredentialsGrant.clientSecret;
 			urlVariables.username = resourceOwnerCredentialsGrant.username;
