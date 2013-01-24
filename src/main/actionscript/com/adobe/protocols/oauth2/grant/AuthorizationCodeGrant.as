@@ -1,5 +1,7 @@
 package com.adobe.protocols.oauth2.grant
 {
+	import com.adobe.protocols.oauth2.OAuth2Const;
+	
 	import flash.media.StageWebView;
 
 	/**
@@ -109,7 +111,7 @@ package com.adobe.protocols.oauth2.grant
 		 */
 		public function getFullAuthUrl(authEndpoint:String):String
 		{
-			var url:String = authEndpoint + "?response_type=code&client_id=" + clientId + "&redirect_uri=" + redirectUri;
+			var url:String = authEndpoint + "?response_type=" + OAuth2Const.RESPONSE_TYPE_AUTHORIZATION_CODE + "&client_id=" + clientId + "&redirect_uri=" + redirectUri;
 			
 			// scope is optional
 			if (scope != null && scope.length > 0)
