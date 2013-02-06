@@ -11,5 +11,7 @@ package com.adobe.protocols.oauth2
 		
 		public static const RESPONSE_PROPERTY_AUTHORIZATION_CODE:String = "code";
 		public static const RESPONSE_PROPERTY_ACCESS_TOKEN:String = "access_token";
+		
+		public static const GOOGLE_INSTALLED_APPLICATION_REDIRECT_URI:String = "urn:ietf:wg:oauth:2.0:oob";
 	}
 }

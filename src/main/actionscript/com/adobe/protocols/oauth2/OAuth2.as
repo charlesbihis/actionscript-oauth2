@@ -273,35 +273,7 @@ package com.adobe.protocols.oauth2
 					if (code != null)
 					{
 						log.debug("Authorization code: " + code);
-						
-						// set up URL request
-						var urlRequest:URLRequest = new URLRequest(tokenEndpoint);
-						var urlLoader:URLLoader = new URLLoader();
-						urlRequest.method = URLRequestMethod.POST;
-						
-						// define POST parameters
-						var urlVariables : URLVariables = new URLVariables();  
-						urlVariables.grant_type = OAuth2Const.GRANT_TYPE_AUTHORIZATION_CODE; 
-						urlVariables.code = code;
-						urlVariables.redirect_uri = authorizationCodeGrant.redirectUri;
-						urlVariables.client_id = authorizationCodeGrant.clientId;
-						urlVariables.client_secret = authorizationCodeGrant.clientSecret;
-						urlRequest.data = urlVariables;
-						
-						// attach event listeners
-						urlLoader.addEventListener(Event.COMPLETE, onGetAccessTokenResult);
-						urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onGetAccessTokenError);
-						urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onGetAccessTokenError);
-						
-						// make the call
-						try
-						{
-							urlLoader.load(urlRequest);
-						}  // try statement
-						catch (error:Error)
-						{
-							log.error("Error loading token endpoint \"" + tokenEndpoint + "\"");
-						}  // catch statement
+						getAccessTokenWithAuthCode(code);
 					}  // if statement
 					else
 					{
@@ -311,6 +283,38 @@ package com.adobe.protocols.oauth2
 						dispatchEvent(getAccessTokenEvent);
 					}  // else statement
 				}  // if statement
+			}  // onLocationChange
+			
+			function getAccessTokenWithAuthCode(code:String):void
+			{
+				// set up URL request
+				var urlRequest:URLRequest = new URLRequest(tokenEndpoint);
+				var urlLoader:URLLoader = new URLLoader();
+				urlRequest.method = URLRequestMethod.POST;
+				
+				// define POST parameters
+				var urlVariables : URLVariables = new URLVariables();  
+				urlVariables.grant_type = OAuth2Const.GRANT_TYPE_AUTHORIZATION_CODE; 
+				urlVariables.code = code;
+				urlVariables.redirect_uri = authorizationCodeGrant.redirectUri;
+				urlVariables.client_id = authorizationCodeGrant.clientId;
+				urlVariables.client_secret = authorizationCodeGrant.clientSecret;
+				urlRequest.data = urlVariables;
+				
+				// attach event listeners
+				urlLoader.addEventListener(Event.COMPLETE, onGetAccessTokenResult);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onGetAccessTokenError);
+				urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onGetAccessTokenError);
+				
+				// make the call
+				try
+				{
+					urlLoader.load(urlRequest);
+				}  // try statement
+				catch (error:Error)
+				{
+					log.error("Error loading token endpoint \"" + tokenEndpoint + "\"");
+				}  // catch statement
 				
 				function onGetAccessTokenResult(event:Event):void
 				{
@@ -347,11 +351,25 @@ package com.adobe.protocols.oauth2
 					
 					dispatchEvent(getAccessTokenEvent);
 				}  // onGetAccessTokenError
-			}  // onLocationChange
+			}  // getAccessTokenWithAuthCode
 			
 			function onStageWebViewComplete(event:Event):void
 			{
-				log.info("Auth URL loading complete after " + (new Date().time - startTime) + "ms");
+				// Note: Special provision made particularly for Google OAuth 2 implementation for installed
+				//       applications.  Particularly, when we see a certain redirect URI, we must look for the authorization
+				//       code in the page title as opposed to in the URL.  See https://developers.google.com/accounts/docs/OAuth2InstalledApp#choosingredirecturi
+				//       for more information.
+				if (authorizationCodeGrant.redirectUri == OAuth2Const.GOOGLE_INSTALLED_APPLICATION_REDIRECT_URI && event.currentTarget.title.indexOf(OAuth2Const.RESPONSE_TYPE_AUTHORIZATION_CODE) > 0)
+				{
+					var codeString:String = event.currentTarget.title.substring(event.currentTarget.title.indexOf(OAuth2Const.RESPONSE_TYPE_AUTHORIZATION_CODE));
+					var code:String = codeString.split("=")[1];
+					log.debug("Authorization code extracted from page title: " + code);
+					getAccessTokenWithAuthCode(code);
+				}
+				else
+				{
+					log.info("Auth URL loading complete after " + (new Date().time - startTime) + "ms");
+				}
 			}  // onStageWebViewComplete
 			
 			function onStageWebViewError(errorEvent:ErrorEvent):void
