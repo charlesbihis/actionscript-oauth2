@@ -10,6 +10,7 @@
     <classEntry path="com.adobe.protocols.oauth2.grant.ResourceOwnerCredentialsGrant"/>
     <classEntry path="com.adobe.protocols.oauth2.event.RefreshAccessTokenEvent"/>
     <classEntry path="com.adobe.protocols.oauth2.OAuth2Const"/>
+    <classEntry path="com.adobe.protocols.oauth2.OAuth2Test"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
