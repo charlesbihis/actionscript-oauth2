@@ -140,7 +140,13 @@ package com.adobe.protocols.oauth2
 			urlVariables.client_id = clientId;
 			urlVariables.client_secret = clientSecret;
 			urlVariables.refresh_token = refreshToken;
-			urlVariables.scope = scope;
+			
+			// define optional scope parameter only when scope not null
+			if(scope !== null)
+			{
+				urlVariables.scope = scope;
+			}
+			
 			urlRequest.data = urlVariables;
 			
 			// attach event listeners
@@ -460,7 +466,13 @@ package com.adobe.protocols.oauth2
 			urlVariables.client_secret = resourceOwnerCredentialsGrant.clientSecret;
 			urlVariables.username = resourceOwnerCredentialsGrant.username;
 			urlVariables.password = resourceOwnerCredentialsGrant.password;
-			urlVariables.scope = resourceOwnerCredentialsGrant.scope;
+			
+			// define optional scope parameter only when scope not null
+			if(resourceOwnerCredentialsGrant.scope !== null)
+			{
+				urlVariables.scope = resourceOwnerCredentialsGrant.scope;
+			}
+			
 			urlRequest.data = urlVariables;
 			
 			// attach event listeners
